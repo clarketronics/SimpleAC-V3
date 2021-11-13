@@ -17,7 +17,6 @@ The code below contains all the options on how you can set up your simpleAC. Rem
 ```c++
 //-------Module Definitions- Delete the "//" of the modules you are using----------
 //#define debug // Unmark this to enable output printing to the serial monitor, this will not continue without a open serial port.
-#define using_PN532 // Unmark this if you are using the PN532 13.56MHz NFC-HF RFID reader.
 #define using_LED // Unmark this if you want to enable the RGB LED.
 #define using_Buzzer // Unmark this if you want to enable the Buzzer.
 #define Sleep // Unmark this if you want to enable sleep mode (conserves battery).

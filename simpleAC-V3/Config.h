@@ -2,7 +2,7 @@
 //#define debug // Unmark this to enable output printing to the serial monitor, this will not continue without a open serial port.
 #define using_LED // Unmark this if you want to enable the RGB LED.
 #define using_Buzzer // Unmark this if you want to enable the Buzzer.
-#define Sleep // Unmark this if you want to enable sleep mode (conserves battery).
+//#define Sleep // Unmark this if you want to enable sleep mode (conserves battery).
 
 
 //------Door mode variables------
