@@ -1,30 +1,19 @@
 //-------Module Definitions- Delete the "//" of the modules you are using----------
 //#define debug // Unmark this to enable output printing to the serial monitor, this will not continue without a open serial port.
-//#define using_MP3 // Unmark this if using the df mp3player.
-//#define using_RC522 // Unmark this if you are using the RC522 13.56MHz NFC-HF RFID reader.
-#define using_PN532 // Unmark this if you are using the PN532 13.56MHz NFC-HF RFID reader.
 #define using_LED // Unmark this if you want to enable the RGB LED.
 #define using_Buzzer // Unmark this if you want to enable the Buzzer.
 #define Sleep // Unmark this if you want to enable sleep mode (conserves battery).
 
-//-------Mode Definitions- Delete the "//" of the mode you want to use----------
-#define car // This mode is designed to lock and unlock a car.
-//#define bike // This mode is designed to prime and then starts the bike.
-//#define accessory // This mode is designed to give a latching output when authorised.
+
+//------Door mode variables------
+#define statePin 2 // State input pin, locked / unlocked?
+#define unlockDelay 500 // Amount of time to wait before turning the relay back off.
+#define lockDelay 500 // Amount of time to wait before turning the relay back off.
 
 
-//------Car mode variables------
-#ifdef car
-    #define statePin 2 // State input pin, locked / unlocked?
-    #define unlockDelay 500 // Amount of time to wait before turning the relay back off.
-    #define lockDelay 500 // Amount of time to wait before turning the relay back off.
-#endif
-
-//------Bike mode variables------
-#ifdef bike
-    #define primeTime 3000 // The amount of time after relay 1 triggers to wait for the bike to prime.
-    #define startTime 5000 // The amount of time to run the starter motor.
-#endif
+//------Ignition mode variables------
+#define primeTime 3000 // The amount of time after relay 1 triggers to wait for the bike to prime.
+#define startTime 5000 // The amount of time to run the starter motor.
 
 
 // Don't touch anything below, or do im not your mum.
@@ -32,6 +21,11 @@
 //------Relay setup------
 #define relay1 5 // Relay 1.
 #define relay2 6 // Relay 2.
+#define relay3 9 // Relay 3.
+
+//------Dip setup------
+#define dip1 0 // Dip switch 1.
+#define dip2 1 // Dip switch 2.
 
 //------Default input state------
 #define defaultState HIGH // Default state for inputs.

@@ -12,4 +12,4 @@ enum inputState{
     Unlocked
 };
 
-void authorised(Data &data, FlashBeep &feedback);
+void authorised(Data &data, FlashBeep &feedback, DFRobotDFPlayerMini &DFPlayer);

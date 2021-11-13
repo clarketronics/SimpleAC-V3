@@ -7,4 +7,4 @@
 #include "Data.h"
 #include "MP3.h"
 
-void unauthorised(Data &data, FlashBeep &feedback);
+void unauthorised(Data &data, FlashBeep &feedback, DFRobotDFPlayerMini &DFPlayer);

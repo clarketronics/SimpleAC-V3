@@ -2,109 +2,62 @@
 
 // Reader class constructor, sets up readers for use.
 void Helpers::setupReader(FlashBeep &feedback, NFCReader &nfcReader){
-  #ifdef using_RC522
-    SPI.begin();  // Initiate  SPI bus.
-    delay(2000); // Wait for the SPI to come up.
-    nfcReader.PCD_Init(); // Initiate MFRC522
-    nfcReader.PCD_SetAntennaGain(nfcReader.RxGain_max); // Set antenna gain to max (longest range).
-    byte v = nfcReader.PCD_ReadRegister(nfcReader.VersionReg); // Get the software version.
+  nfcReader.begin();
+  uint32_t versiondata = nfcReader.getFirmwareVersion();
 
-    if ((v == 0x00) || (v == 0xFF)) {
+  // Check the device is connected, error if not.
+  if (!versiondata) {
+      // Error state outputs (debug messages).
       #ifdef debug
-        Serial.println(F("WARNING: Communication failure, is the MFRC522 properly connected?"));
-        Serial.println(F("SYSTEM HALTED: Check connections."));
+          Serial.print("Didn't find PN53x board");
       #endif
 
       // Flash the red LED and beep 3 times.
       feedback.output(SHORT_PERIOD, 3, RGBred);
 
       // Halt.
-      while (true);
-    }
+      while(true);
+  }
 
-    // Reader is ready.
-    #ifdef debug
+  // Got ok data, print it out!
+  #ifdef debug
+      Serial.print("Found chip PN5"); Serial.println((versiondata>>24) & 0xFF, HEX); 
+      Serial.print("Firmware ver. "); Serial.print((versiondata>>16) & 0xFF, DEC); 
+      Serial.print('.'); Serial.println((versiondata>>8) & 0xFF, DEC);
+  #endif
+
+  /* Set the max number of retry attempts to read from a card
+  This prevents us from waiting forever for a card, which is
+  the default behaviour of the PN532. */
+  nfcReader.setPassiveActivationRetries(0xFF);
+
+  // configure board to read RFID tags
+  nfcReader.SAMConfig();
+
+  // Reader is ready.
+  #ifdef debug
       Serial.println(F("Reader is ready."));
-    #endif
-  #endif
-
-  #ifdef using_PN532
-    nfcReader.begin();
-    uint32_t versiondata = nfcReader.getFirmwareVersion();
-
-    // Check the device is connected, error if not.
-    if (!versiondata) {
-        // Error state outputs (debug messages).
-        #ifdef debug
-            Serial.print("Didn't find PN53x board");
-        #endif
-
-        // Flash the red LED and beep 3 times.
-        feedback.output(SHORT_PERIOD, 3, RGBred);
-
-        // Halt.
-        while(true);
-    }
-
-    // Got ok data, print it out!
-    #ifdef debug
-        Serial.print("Found chip PN5"); Serial.println((versiondata>>24) & 0xFF, HEX); 
-        Serial.print("Firmware ver. "); Serial.print((versiondata>>16) & 0xFF, DEC); 
-        Serial.print('.'); Serial.println((versiondata>>8) & 0xFF, DEC);
-    #endif
-
-    /* Set the max number of retry attempts to read from a card
-    This prevents us from waiting forever for a card, which is
-    the default behaviour of the PN532. */
-    nfcReader.setPassiveActivationRetries(0xFF);
-
-    // configure board to read RFID tags
-    nfcReader.SAMConfig();
-
-    // Reader is ready.
-    #ifdef debug
-        Serial.println(F("Reader is ready."));
-    #endif      
-  #endif
+  #endif      
 }
 
 // Read a card and return a bool.
 bool Helpers::readCard(Data &data, NFCReader &nfcReader){
-  #ifdef using_PN532
-    bool success;
-    uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };  // Buffer to store the returned UID
-    uint8_t uidLength;                        // Length of the UID (4 or 7 bytes depending on ISO14443A card type)
-    
-    // On each loop check if a ISO14443A card has been found.
-    success = nfcReader.readPassiveTargetID(PN532_MIFARE_ISO14443A, &uid[0], &uidLength);
+  bool success;
+  uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };  // Buffer to store the returned UID
+  uint8_t uidLength;                        // Length of the UID (4 or 7 bytes depending on ISO14443A card type)
+  
+  // On each loop check if a ISO14443A card has been found.
+  success = nfcReader.readPassiveTargetID(PN532_MIFARE_ISO14443A, &uid[0], &uidLength);
 
-    if (success) {
-      for (int i = 0; i < uidLength; i++) {
-        memcpy(data.readCard + i, uid + i, 1);
-      }
-
-      return true;
-    } else {
-      return false;
-    }
-  #endif
-
-  #ifdef using_RC522
-    // On each loop check if a ISO14443A card has been found.
-    if ( ! nfcReader.PICC_IsNewCardPresent()) {
-      return false;
+  if (success) {
+    for (int i = 0; i < uidLength; i++) {
+      memcpy(data.readCard + i, uid + i, 1);
     }
 
-    // Select one of the cards
-    if ( ! nfcReader.PICC_ReadCardSerial()) {
-      return false;
-    }
-    
-    for (byte i = 0; i < nfcReader.uid.size; i++) {
-      data.readCard[i] = nfcReader.uid.uidByte[i];
-    }
     return true;
-  #endif
+  } else {
+    return false;
+  }
 }
 
 // If the uid is 4bytes followed by 3bytes of 00 remove them.
@@ -476,6 +429,17 @@ void Helpers::onBoot(Data &data, NFCReader &nfcReader, FlashBeep &feedback){
 
     // Enter learning mode because master was just set.
     data.state = cardIsMaster;
+  }
+
+  // Check dip switches for mode.
+  if (dip1 == HIGH){
+    data.mode = accessory;
+  } else {
+    if (dip2 == HIGH){
+      data.mode = door;
+    } else {
+      data.mode = ignition;
+    }
   }
 }
 

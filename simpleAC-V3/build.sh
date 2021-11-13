@@ -42,7 +42,7 @@ upload(){
 }
 
 getdependancies(){
-  arduino-cli lib install LinkedList DFRobotDFPlayerMini MFRC522
+  arduino-cli lib install LinkedList DFRobotDFPlayerMini
   arduino-cli lib install --git-url https://github.com/clarketronics/PN532
 }
 

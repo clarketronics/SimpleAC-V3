@@ -1,7 +1,7 @@
 #include "Unauthorised.h"
 
 // If UID is incorrect do this.
-void unauthorised(Data &data, FlashBeep &feedback) { 
+void unauthorised(Data &data, FlashBeep &feedback, DFRobotDFPlayerMini &DFPlayer) { 
   // Write the number of aunothorised scans to eeprom.
   int unAuthScan = EEPROM.read(unauthScanCountLocation);
   unAuthScan++;
@@ -16,9 +16,9 @@ void unauthorised(Data &data, FlashBeep &feedback) {
   feedback.output(SHORT_PERIOD, 3, RGBred);
 
   // Play the track assigned when a unauthorised card / implant is scanned.
-  #ifdef using_MP3
+  if (data.mp3Found) {
     mp3Play(DFPlayer, unauthorisedTrack);
-  #endif
+  }
 
   // Lockout all actions for set time.
   if (unAuthScan == 3) {

@@ -1,10 +1,9 @@
 #include "Authorised.h"
 
-// Car authorised routine
-#ifdef car
-    // If UID is correct do this.
-    void authorised(Data &data, FlashBeep &feedback) { 
-        // Reset the un authorised scan counter.
+void authorised(Data &data, FlashBeep &feedback, DFRobotDFPlayerMini &DFPlayer) {
+    switch (data.mode) {
+        case door:
+            // Reset the un authorised scan counter.
         EEPROM.update(unauthScanCountLocation, 0);
 
         // Serial message to notify that UID is valid.
@@ -14,9 +13,9 @@
         #endif
 
         // Play the track assigned when a authorised card / implant is scanned.
-        #ifdef using_MP3
+        if (data.mp3Found) {
             mp3Play(DFPlayer, authorisedTrack);
-        #endif
+        }
 
         // Check what state the input is in.
         inputState State = digitalRead(statePin) ? Locked : Unlocked;
@@ -122,14 +121,11 @@
         #ifdef Sleep
             data.startMillis = millis(); // Reset timeout counter.
         #endif
-    }
-#endif
 
-// Bike authorised routine
-#ifdef bike
-    // If UID is correct do this.
-    void authorised(Data &data, FlashBeep &feedback) { 
-        // Reset the un authorised scan counter.
+        break;
+
+        case ignition:
+            // Reset the un authorised scan counter.
         EEPROM.update(unauthScanCountLocation, 0);
 
         // Serial message to notify that UID is valid.
@@ -149,10 +145,9 @@
         #endif
 
         // Play the track assigned when a authorised card / implant is scanned.
-        #ifdef using_MP3
+        if (data.mp3Found) {
             mp3Play(DFPlayer, authorisedTrack);
-        #endif
-
+        }
 
         digitalWrite(relay1, HIGH); // Turn on relay 1, main power to the bike.
 
@@ -179,14 +174,11 @@
         #ifdef Sleep
             data.startMillis = millis(); // Reset timeout counter.
         #endif
-    }
-#endif
 
-// Accessory authorised routine
-#ifdef accessory
-    // If UID is correct do this.
-    void authorised(Data &data, FlashBeep &feedback) { 
-        // Reset the un authorised scan counter.
+        break;
+
+        case accessory:
+            // Reset the un authorised scan counter.
         EEPROM.update(unauthScanCountLocation, 0);
 
         // Serial message to notify that UID is valid.
@@ -206,9 +198,9 @@
         #endif
 
         // Play the track assigned when a authorised card / implant is scanned.
-        #ifdef using_MP3
+        if (data.mp3Found) {
             mp3Play(DFPlayer, authorisedTrack);
-        #endif
+        }
 
         // If the relay is not enabled turn on else turn off.
         if (!data.enabled){
@@ -223,5 +215,7 @@
         #ifdef Sleep
             data.startMillis = millis(); // Reset timeout counter.
         #endif
+        
+        break;
     }
-#endif
+};

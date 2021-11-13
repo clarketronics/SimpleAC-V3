@@ -7,7 +7,6 @@
 #include "SPI.h"
 #include "PN532_SPI.h"
 #include "PN532.h"
-#include <MFRC522.h>
 
 //------Card size config------
 enum cardSize{
@@ -25,11 +24,7 @@ enum cardSize{
 #define clearButton A0
 
 //------Reader wrapper------
-#if defined(using_PN532)
-    typedef PN532 NFCReader;
-#elif defined(using_RC522)        
-    typedef MFRC522 NFCReader;
-#endif
+typedef PN532 NFCReader;
 
 
 class Helpers {

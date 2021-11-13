@@ -1,7 +1,7 @@
 #include "MP3.h"
 
 // Startup the mp3 player.
-void mp3Begin(DFRobotDFPlayerMini &mp3, SoftwareSerial &softSerial, FlashBeep &feedback){
+void mp3Begin(DFRobotDFPlayerMini &mp3, SoftwareSerial &softSerial, FlashBeep &feedback, Data &data){
     softSerial.begin(9600); // Start SoftwareSerial at 9600 baud.
 
     // Check the device is connected, error if not.
@@ -16,9 +16,13 @@ void mp3Begin(DFRobotDFPlayerMini &mp3, SoftwareSerial &softSerial, FlashBeep &f
       // Flash the red LED and beep 2 times.
       feedback.output(SHORT_PERIOD, 2, RGBred);
 
-      // Halt.
-      while(true){}
+      // End softSerial (saves resources).
+      softSerial.end();
+
+      return;
     }
+
+    data.mp3Found = true; // Set mp3 player flag to true.
 
     #ifdef debug
       Serial.println(F("mp3Player ready."));

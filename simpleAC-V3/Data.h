@@ -10,6 +10,13 @@ struct card {
     int index;
 };
 
+//------Mode------
+enum Mode{
+    door,
+    ignition,
+    accessory
+};
+
 //------State machine config------
 enum states{    
     startOfDay,
@@ -33,13 +40,11 @@ class Data {
         byte smallCard[4] = {00,00,00,00};
         int cardCount, masterSize, state; // Total number of stored cards, size of the master card, state the state machine is in.
         bool itsA4byte; // Is the scanned card a 4 byte.
+        bool enabled; // Flag for accessory mode.
+        bool mp3Found = false; // Flag for MP3 commands.
+        Mode mode; // Mode for current operation.
         unsigned long currentMillis, startMillis; // To keep track of time and time since wake.
-
-        LinkedList<card> authorisedCards = LinkedList<card>();
-
-        // State toggle
-        #ifdef accessory
-          bool enabled;
-        #endif
         
+
+        LinkedList<card> authorisedCards = LinkedList<card>();        
 };

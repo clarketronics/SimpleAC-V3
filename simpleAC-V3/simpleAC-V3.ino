@@ -1,8 +1,7 @@
 /* 
 Required libraries:
 LinkedList https://github.com/ivanseidel/LinkedList This is used for managing card UID's.    
-DFRobotDFPlayerMini https://github.com/DFRobot/DFRobotDFPlayerMini This is for the MP3 player module.    
-MFRC522 https://github.com/miguelbalboa/rfid This is for the RC522 reader module.    
+DFRobotDFPlayerMini https://github.com/DFRobot/DFRobotDFPlayerMini This is for the MP3 player module.        
 PN532 https://github.com/clarketronics/PN532 This is for the PN532 reader module (includes power saving).    
 SoftwareSerial This is required by the DFRobot library above and is part of the default install.    
 
@@ -35,24 +34,14 @@ FlashBeep feedback;
 Helpers helpers;
 Data data;
 
-// Catch idiots defining both reader.
-#if defined(using_RC522) && defined(using_PN532) 
-#error "You can't define both readers at the same time!."
-#endif
-
 //------Generic reader wrapper------
-#if defined(using_PN532)
-    PN532_SPI pn532spi(SPI, 10); // Create an SPI instance of the PN532, (Interface, SS pin).
-    NFCReader nfcReader(pn532spi); // Create the readers class for addressing it directly.
-#elif defined(using_RC522)        
-    NFCReader nfcReader(10, 9);   // Create MFRC522 instance, (SS pin, RST pin).
-#endif
+PN532_SPI pn532spi(SPI, 10); // Create an SPI instance of the PN532, (Interface, SS pin).
+NFCReader nfcReader(pn532spi); // Create the readers class for addressing it directly.
+
 
 //------MP3 setup------
-#ifdef using_MP3
-    SoftwareSerial softSerial(8, 7); // Create SoftwareSerial instance (RX pin, TX pin).
-    DFRobotDFPlayerMini DFPlayer;
-#endif
+SoftwareSerial softSerial(8, 7); // Create SoftwareSerial instance (RX pin, TX pin).
+DFRobotDFPlayerMini DFPlayer;
 
 // Setup.
 void setup() {
@@ -81,15 +70,19 @@ void setup() {
     helpers.waitForSerial(5000); // Wait for serial to be open or 5 seconds.
   #endif
 
-  #ifdef using_MP3
-    mp3Begin(DFPlayer, softSerial, feedback);
-  #endif
+  mp3Begin(DFPlayer, softSerial, feedback, data);
 
   // Setup relays.
   pinMode(relay1, OUTPUT); // Declaring relay 1 as an output.
   digitalWrite(relay1, LOW); // Setting it to OFF.
   pinMode(relay2, OUTPUT); //Declaring relay 2 as output.
   digitalWrite(relay2, LOW); // Setting it to OFF.  
+  pinMode(relay3, OUTPUT); //Declaring relay 2 as output.
+  digitalWrite(relay3, LOW); // Setting it to OFF.
+
+  // Setup dip's
+  pinMode(dip1, INPUT_PULLUP); // Declaring dip1 as an input with pullup enabled.
+  pinMode(dip2, INPUT_PULLUP); // Declaring dip2 as an input with pullup enabled.
 
   // Set state of input pins (input or input with pullup enabled)
   if (defaultState == HIGH){
@@ -201,13 +194,13 @@ void loop() {
     case cardIs4ByteAccess:
     case cardIs7ByteAccess:
       // If a match is found and the device is not already in an enabled state activate.
-      authorised(data, feedback);
+      authorised(data, feedback, DFPlayer);
       helpers.cleanup(data);
       data.state = waitingOnCard;
     break;
     case noMatch:
       // If a match is not found unauthorised.
-      unauthorised(data, feedback);
+      unauthorised(data, feedback, DFPlayer);
       helpers.cleanup(data);
       data.state = waitingOnCard;
     break;
